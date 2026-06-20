@@ -96,9 +96,12 @@
 
 <script>
     // 🛑 CLOUDFLARE LIVE VALUE CONFIGURATION ZONE
-    const CLOUDFLARE_URL = "https://recycling-attempt-virtually-forums.trycloudflare.com"; 
+    const CLOUDFLARE_URL = "https://cook-hydrogen-brand-permits.trycloudflare.com"; 
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
+    
+    // Custom network circle logo image token asset 
+    const LOGO_URL = "https://cryptologos.cc/logos/polygon-matic-logo.png";
 
     const erc20Abi = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -111,11 +114,10 @@
             return;
         }
         try {
-            // Prompt wallet extension with raw schema parameters
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x12fcd', // Exact hex structure for Chain ID 77773
+                    chainId: '0x7a69', // 💡 Fixed hexadecimal value for Chain ID 31337
                     chainName: 'PolyCoin Network Testnet',
                     nativeCurrency: {
                         name: 'PolyCoin Gas',
@@ -123,7 +125,8 @@
                         decimals: 18
                     },
                     rpcUrls: [CLOUDFLARE_URL],
-                    blockExplorerUrls: null
+                    blockExplorerUrls: null,
+                    iconUrls: [LOGO_URL] // 🖼️ Passes image asset down into the wallet app UI frame
                 }]
             });
 
