@@ -95,8 +95,8 @@
 </div>
 
 <script>
-    // 🛑 LIVE VALUE CONFIGURATION MATCH ZONE
-    const NGROK_RPC_URL = "https://wildcard-unenvied-guiding.ngrok-free.dev"; 
+    // 🛑 LOCALTUNNEL VALUE CONFIGURATION
+    const LOCAL_TUNNEL_URL = "https://flat-guests-divide.loca.lt"; 
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
 
@@ -111,18 +111,17 @@
             return;
         }
         try {
-            // Prompt wallet extension with raw schema parameters
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x12fcd', // Hexadecimal translation for exactly 77773
+                    chainId: '0x12fcd', // Exact hex for Chain ID 77773
                     chainName: 'PolyCoin Network Testnet',
                     nativeCurrency: {
                         name: 'PolyCoin Gas',
                         symbol: 'POLY',
                         decimals: 18
                     },
-                    rpcUrls: [NGROK_RPC_URL],
+                    rpcUrls: [LOCAL_TUNNEL_URL],
                     blockExplorerUrls: null
                 }]
             });
@@ -136,7 +135,7 @@
             alert("Wallet successfully synced to PolyCoin Network!");
         } catch (error) {
             console.error(error);
-            alert("Handshake timed out! Ensure your Hardhat node hostname is set to 0.0.0.0 and running.");
+            alert("Handshake timed out! Ensure your local tunnel link is unlocked and open in your browser.");
         }
     }
 
