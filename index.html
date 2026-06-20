@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PolyCoin Network Hub</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="text/javascript"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -95,29 +95,30 @@
 </div>
 
 <script>
-    // ⚠️ CONFIGURATION VARIABLES: REPLACE WITH YOUR DEPLOYED CONTRACT ADDRESSES
+    // 🛑 PASTE YOUR LIVE VALUES FROM THE COMMAND LINE AND NGROK TERMINAL HERE:
     const NGROK_RPC_URL = "https://wildcard-unenvied-guiding.ngrok-free.dev"; 
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
 
-    // Basic Minimal ERC-20 ABI to read balances
+    // Explicitly targeting the browser runtime window context for Ethers v5
+    const ethEngine = window.ethers;
+
     const erc20Abi = [
         "function balanceOf(address owner) view returns (uint256)",
         "function decimals() view returns (uint8)"
     ];
 
-    // Function to inject network parameters and logo into MetaMask automatically
     async function addNetworkAndLogo() {
         if (!window.ethereum) {
-            alert("Please install MetaMask to interact with this network!");
+            alert("MetaMask extension not detected!");
             return;
         }
         try {
-            // Request MetaMask to switch to or add your custom network
+            // Automatically prompt MetaMask to inject your network configuration
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x12fcd', // 77777 converted to Hexadecimal format
+                    chainId: '0x12fcd', // Chain ID 77777 converted to Hex format
                     chainName: 'PolyCoin Network Testnet',
                     nativeCurrency: {
                         name: 'PolyCoin Gas',
@@ -126,48 +127,48 @@
                     },
                     rpcUrls: [NGROK_RPC_URL],
                     blockExplorerUrls: null,
-                    // Injects your logo directly into the MetaMask asset menu UI
-                    iconUrls: ['https://yourusername.github.io/polycoin-network/logo.png'] 
+                    // Pulls logo data safely from your updated GitHub repository file tree
+                    iconUrls: ['https://raw.githubusercontent.com/SounSoni/polycoin-core/main/logo.png'] 
                 }]
             });
 
-            // Connect account details
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const provider = new ethEngine.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
             const address = await signer.getAddress();
-            document.getElementById("walletAddress").innerText = address;
             
-            alert("Successfully connected to PolyCoin Network!");
+            document.getElementById("walletAddress").innerText = address;
+            alert("MetaMask successfully synced to PolyCoin Network!");
         } catch (error) {
-            console.error("Connection failed:", error);
-            alert("Error joining network. Check if your Node and Ngrok are online!");
+            console.error("Connection interface crashed:", error);
+            alert("Connection error! Double check that your Hardhat terminal node and ngrok script are active.");
         }
     }
 
-    // Function to read contract balances directly from your custom network
     async function loadBalances() {
-        if (!window.ethereum) return;
+        if (!window.ethereum || !ethEngine) {
+            alert("Please connect your wallet first.");
+            return;
+        }
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const provider = new ethEngine.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const address = await signer.getAddress();
 
-            // 1. Fetch PolyCoin Balance (18 Decimals)
-            const polyContract = new ethers.Contract(POLY_CONTRACT_ADDRESS, erc20Abi, provider);
+            // Fetch custom PolyCoin ($POLY) Data
+            const polyContract = new ethEngine.Contract(POLY_CONTRACT_ADDRESS, erc20Abi, provider);
             const polyRawBal = await polyContract.balanceOf(address);
-            document.getElementById("polyBalance").innerText = ethers.utils.formatEther(polyRawBal);
+            document.getElementById("polyBalance").innerText = ethEngine.utils.formatEther(polyRawBal);
 
-            // 2. Fetch USDT Balance (6 Decimals)
-            const usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, erc20Abi, provider);
+            // Fetch simulated stablecoin ($USDT) Data
+            const usdtContract = new ethEngine.Contract(USDT_CONTRACT_ADDRESS, erc20Abi, provider);
             const usdtRawBal = await usdtContract.balanceOf(address);
-            // USDT uses 6 decimals, so format manually or divide by 10^6
             const usdtFormatted = (usdtRawBal.toNumber() / 10**6).toFixed(2);
             document.getElementById("usdtBalance").innerText = "$" + usdtFormatted;
 
         } catch (error) {
-            console.error("Failed to read balance values from contract:", error);
-            alert("Could not load balances. Ensure you are switched to the PolyCoin network.");
+            console.error("Failed to map ledger indexes:", error);
+            alert("Balance fetch error. Check that MetaMask is switched to your custom network!");
         }
     }
 </script>
