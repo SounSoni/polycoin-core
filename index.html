@@ -25,18 +25,13 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: center;
         }
-        .logo {
+        .logo-img {
             width: 100px;
             height: 100px;
             border-radius: 50%;
             margin-bottom: 20px;
-            background: #38bdf8;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: #0f172a;
+            object-fit: cover;
+            border: 3px solid #38bdf8;
         }
         h1 { margin-bottom: 5px; color: #38bdf8; }
         .subtitle { color: #94a3b8; margin-bottom: 30px; }
@@ -81,7 +76,8 @@
 <body>
 
 <div class="container">
-    <div class="logo">POLY</div>
+    <img src="https://raw.githubusercontent.com/SounSoni/polycoin-core/main/logo.png" class="logo-img" alt="POLY Logo" onerror="this.style.display='none'">
+    
     <h1>PolyCoin Network</h1>
     <p class="subtitle">Sovereign Windows-Hosted EVM Ecosystem</p>
 
@@ -117,7 +113,8 @@
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
     
-    const LOGO_URL = "https://cryptologos.cc/logos/polygon-matic-logo.png";
+    // 🔥 Pointed directly to your repository's raw image file asset location path
+    const LOGO_URL = "https://raw.githubusercontent.com/SounSoni/polycoin-core/main/logo.png";
     const USDT_LOGO_URL = "https://cryptologos.cc/logos/tether-usdt-logo.png";
 
     const erc20Abi = [
