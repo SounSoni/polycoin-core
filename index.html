@@ -60,6 +60,8 @@
         .btn-mm:hover { background: #e27613; transform: translateY(-2px); }
         .btn-tw { background: #3375bb; }
         .btn-tw:hover { background: #225a94; transform: translateY(-2px); }
+        .btn-poly { background: #0ea5e9; }
+        .btn-poly:hover { background: #0284c7; transform: translateY(-2px); }
         .btn-usdt { background: #26a17b; }
         .btn-usdt:hover { background: #1e8363; transform: translateY(-2px); }
         .btn-action { background: #38bdf8; color: #0f172a; margin-top: 15px; }
@@ -85,6 +87,8 @@
 
     <button class="btn-mm" onclick="addNetwork('metamask')">🦊 Connect & Add to MetaMask</button>
     <button class="btn-tw" onclick="addNetwork('trustwallet')">🛡️ Connect & Add to Trust Wallet</button>
+    
+    <button class="btn-poly" onclick="watchPolyAsset()">🪙 Add POLY Logo to Wallet Display</button>
     <button class="btn-usdt" onclick="watchUsdtAsset()">💵 Add Custom USDT to Wallet Display</button>
     
     <button class="btn-action" onclick="loadBalances()">🔄 Check My Asset Balances</button>
@@ -108,7 +112,7 @@
 </div>
 
 <script>
-    // 🛑 CLOUDFLARE LIVE VALUE CONFIGURATION ZONE
+    // 🛑 LIVE VALUE CONFIGURATION ZONE - Verify this matches your current Cloudflare terminal active link!
     const CLOUDFLARE_URL = "https://cook-hydrogen-brand-permits.trycloudflare.com"; 
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
@@ -163,7 +167,31 @@
             alert(`Successfully connected to ${targetWallet === 'metamask' ? 'MetaMask' : 'Trust Wallet'}!`);
         } catch (error) {
             console.error(error);
-            alert("Handshake integration timed out.");
+            alert("Handshake integration timed out. Confirm your cloudflared endpoint is running smoothly.");
+        }
+    }
+
+    async function watchPolyAsset() {
+        if (!window.ethereum) {
+            alert("Wallet extension not detected!");
+            return;
+        }
+        try {
+            await window.ethereum.request({
+                method: 'wallet_watchAsset',
+                params: {
+                    type: 'ERC20',
+                    options: {
+                        address: POLY_CONTRACT_ADDRESS,
+                        symbol: 'POLY',
+                        decimals: 18,
+                        image: LOGO_URL,
+                    },
+                },
+            });
+            alert("POLY asset image registration sent to wallet extension tracking ledger!");
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -173,7 +201,6 @@
             return;
         }
         try {
-            // Requests wallet injection tracker for custom ERC-20 assets
             await window.ethereum.request({
                 method: 'wallet_watchAsset',
                 params: {
@@ -202,12 +229,10 @@
             const signer = provider.getSigner();
             const address = await signer.getAddress();
 
-            // Load PolyCoin Balance
             const polyContract = new window.ethers.Contract(POLY_CONTRACT_ADDRESS, erc20Abi, provider);
             const polyRawBal = await polyContract.balanceOf(address);
             document.getElementById("polyBalance").innerText = window.ethers.utils.formatEther(polyRawBal);
 
-            // Load Custom USDT Balance
             const usdtContract = new window.ethers.Contract(USDT_CONTRACT_ADDRESS, erc20Abi, provider);
             const usdtRawBal = await usdtContract.balanceOf(address);
             const usdtFormatted = (usdtRawBal.toNumber() / 10**6).toFixed(2);
