@@ -1,26 +1,175 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PolyCoin Hub</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolyCoin Network Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            background: #38bdf8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        h1 { margin-bottom: 5px; color: #38bdf8; }
+        .subtitle { color: #94a3b8; margin-bottom: 30px; }
+        button {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 10px;
+            width: 80%;
+        }
+        button:hover { background: #0ea5e9; transform: translateY(-2px); }
+        .card {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #334155;
+        }
+        .status-val { font-family: monospace; color: #38bdf8; word-break: break-all; }
+        .balance-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 18px;}
+    </style>
 </head>
 <body>
-    <h1>Welcome to the PolyCoin Network</h1>
-    <button onclick="connectWallet()">Connect Wallet</button>
-    <p id="walletAddress"></p>
 
-    <script>
-        async function connectWallet() {
-            if (window.ethereum) {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-                document.getElementById("walletAddress").innerText = "Connected: " + address;
-            } else {
-                alert("Please install MetaMask!");
-            }
+<div class="container">
+    <div class="logo">POLY</div>
+    <h1>PolyCoin Network</h1>
+    <p class="subtitle">Sovereign Windows-Hosted EVM Ecosystem</p>
+
+    <button onclick="addNetworkAndLogo()">1. Connect & Add Network to MetaMask</button>
+    <button onclick="loadBalances()">2. Check My Balances</button>
+
+    <div class="card">
+        <h3>Wallet Status</h3>
+        <p>Address: <span id="walletAddress" class="status-val">Not Connected</span></p>
+    </div>
+
+    <div class="card">
+        <h3>Ecosystem Assets</h3>
+        <div class="balance-row">
+            <span>🪙 PolyCoin (POLY):</span>
+            <span id="polyBalance" class="status-val">0.0</span>
+        </div>
+        <div class="balance-row">
+            <span>💵 Tether USD (USDT):</span>
+            <span id="usdtBalance" class="status-val">0.0</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ CONFIGURATION VARIABLES: REPLACE WITH YOUR DEPLOYED CONTRACT ADDRESSES
+    const NGROK_RPC_URL = "https://wildcard-unenvied-guiding.ngrok-free.dev"; 
+    const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
+    const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
+
+    // Basic Minimal ERC-20 ABI to read balances
+    const erc20Abi = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function decimals() view returns (uint8)"
+    ];
+
+    // Function to inject network parameters and logo into MetaMask automatically
+    async function addNetworkAndLogo() {
+        if (!window.ethereum) {
+            alert("Please install MetaMask to interact with this network!");
+            return;
         }
-    </script>
+        try {
+            // Request MetaMask to switch to or add your custom network
+            await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                    chainId: '0x12fcd', // 77777 converted to Hexadecimal format
+                    chainName: 'PolyCoin Network Testnet',
+                    nativeCurrency: {
+                        name: 'PolyCoin Gas',
+                        symbol: 'POLY',
+                        decimals: 18
+                    },
+                    rpcUrls: [NGROK_RPC_URL],
+                    blockExplorerUrls: null,
+                    // Injects your logo directly into the MetaMask asset menu UI
+                    iconUrls: ['https://yourusername.github.io/polycoin-network/logo.png'] 
+                }]
+            });
+
+            // Connect account details
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const address = await signer.getAddress();
+            document.getElementById("walletAddress").innerText = address;
+            
+            alert("Successfully connected to PolyCoin Network!");
+        } catch (error) {
+            console.error("Connection failed:", error);
+            alert("Error joining network. Check if your Node and Ngrok are online!");
+        }
+    }
+
+    // Function to read contract balances directly from your custom network
+    async function loadBalances() {
+        if (!window.ethereum) return;
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const address = await signer.getAddress();
+
+            // 1. Fetch PolyCoin Balance (18 Decimals)
+            const polyContract = new ethers.Contract(POLY_CONTRACT_ADDRESS, erc20Abi, provider);
+            const polyRawBal = await polyContract.balanceOf(address);
+            document.getElementById("polyBalance").innerText = ethers.utils.formatEther(polyRawBal);
+
+            // 2. Fetch USDT Balance (6 Decimals)
+            const usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, erc20Abi, provider);
+            const usdtRawBal = await usdtContract.balanceOf(address);
+            // USDT uses 6 decimals, so format manually or divide by 10^6
+            const usdtFormatted = (usdtRawBal.toNumber() / 10**6).toFixed(2);
+            document.getElementById("usdtBalance").innerText = "$" + usdtFormatted;
+
+        } catch (error) {
+            console.error("Failed to read balance values from contract:", error);
+            alert("Could not load balances. Ensure you are switched to the PolyCoin network.");
+        }
+    }
+</script>
 </body>
 </html>
