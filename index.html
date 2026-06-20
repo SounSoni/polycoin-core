@@ -73,7 +73,7 @@
     <h1>PolyCoin Network</h1>
     <p class="subtitle">Sovereign Windows-Hosted EVM Ecosystem</p>
 
-    <button onclick="addNetworkAndLogo()">1. Connect & Add Network to MetaMask</button>
+    <button onclick="addNetworkAndLogo()">1. Connect & Add Network to Wallet</button>
     <button onclick="loadBalances()">2. Check My Balances</button>
 
     <div class="card">
@@ -95,7 +95,7 @@
 </div>
 
 <script>
-    // 🛑 PASTE YOUR CURRENT ACTIVE URLS AND ADDRESSES HERE:
+    // 🛑 LIVE VALUE CONFIGURATION MATCH ZONE
     const NGROK_RPC_URL = "https://wildcard-unenvied-guiding.ngrok-free.dev"; 
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
@@ -107,15 +107,15 @@
 
     async function addNetworkAndLogo() {
         if (!window.ethereum) {
-            alert("MetaMask extension not found!");
+            alert("Crypto wallet extension not detected!");
             return;
         }
         try {
-            // Send request to user extension interface
+            // Prompt wallet extension with raw schema parameters
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x12fcd', // Chain ID 77777 in hex
+                    chainId: '0x12fcd', // Hexadecimal translation for exactly 77773
                     chainName: 'PolyCoin Network Testnet',
                     nativeCurrency: {
                         name: 'PolyCoin Gas',
@@ -127,23 +127,22 @@
                 }]
             });
 
-            // Read address details
             const provider = new window.ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
             const address = await signer.getAddress();
             
             document.getElementById("walletAddress").innerText = address;
-            alert("MetaMask linked up successfully!");
+            alert("Wallet successfully synced to PolyCoin Network!");
         } catch (error) {
             console.error(error);
-            alert("Error linking connection. Is your Node and ngrok online?");
+            alert("Handshake timed out! Ensure your Hardhat node hostname is set to 0.0.0.0 and running.");
         }
     }
 
     async function loadBalances() {
         if (!window.ethereum) {
-            alert("Please hook up MetaMask first.");
+            alert("Please hook up your wallet extension first.");
             return;
         }
         try {
@@ -151,12 +150,12 @@
             const signer = provider.getSigner();
             const address = await signer.getAddress();
 
-            // Read Poly values
+            // Load PolyCoin Balance
             const polyContract = new window.ethers.Contract(POLY_CONTRACT_ADDRESS, erc20Abi, provider);
             const polyRawBal = await polyContract.balanceOf(address);
             document.getElementById("polyBalance").innerText = window.ethers.utils.formatEther(polyRawBal);
 
-            // Read USDT values
+            // Load Custom USDT Balance
             const usdtContract = new window.ethers.Contract(USDT_CONTRACT_ADDRESS, erc20Abi, provider);
             const usdtRawBal = await usdtContract.balanceOf(address);
             const usdtFormatted = (usdtRawBal.toNumber() / 10**6).toFixed(2);
@@ -164,7 +163,7 @@
 
         } catch (error) {
             console.error(error);
-            alert("Balance look up failed. Make sure your wallet is active on the network!");
+            alert("Failed to fetch balance. Verify your wallet is switched to your custom network!");
         }
     }
 </script>
