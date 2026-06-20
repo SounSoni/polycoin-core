@@ -41,19 +41,27 @@
         h1 { margin-bottom: 5px; color: #38bdf8; }
         .subtitle { color: #94a3b8; margin-bottom: 30px; }
         button {
-            background: #38bdf8;
             color: #0f172a;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 24px;
             font-size: 16px;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin: 10px;
-            width: 80%;
+            margin: 8px 0;
+            width: 90%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        button:hover { background: #0ea5e9; transform: translateY(-2px); }
+        .btn-mm { background: #f6851b; color: #ffffff; }
+        .btn-mm:hover { background: #e27613; transform: translateY(-2px); }
+        .btn-tw { background: #3375bb; color: #ffffff; }
+        .btn-tw:hover { background: #225a94; transform: translateY(-2px); }
+        .btn-action { background: #38bdf8; color: #0f172a; margin-top: 15px; }
+        .btn-action:hover { background: #0ea5e9; transform: translateY(-2px); }
         .card {
             background: #0f172a;
             padding: 15px;
@@ -73,12 +81,15 @@
     <h1>PolyCoin Network</h1>
     <p class="subtitle">Sovereign Windows-Hosted EVM Ecosystem</p>
 
-    <button onclick="addNetworkAndLogo()">1. Connect & Add Network to Wallet</button>
-    <button onclick="loadBalances()">2. Check My Balances</button>
+    <button class="btn-mm" onclick="addNetwork('metamask')">🦊 Connect & Add to MetaMask</button>
+    
+    <button class="btn-tw" onclick="addNetwork('trustwallet')">🛡️ Connect & Add to Trust Wallet</button>
+    
+    <button class="btn-action" onclick="loadBalances()">🔄 Check My Asset Balances</button>
 
     <div class="card">
-        <h3>Wallet Status</h3>
-        <p>Address: <span id="walletAddress" class="status-val">Not Connected</span></p>
+        <h3>Connected Environment Status</h3>
+        <p>Wallet Address: <span id="walletAddress" class="status-val">Not Connected</span></p>
     </div>
 
     <div class="card">
@@ -100,7 +111,7 @@
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
     
-    // Custom network circle logo image token asset 
+    // Web logo token icon image target parameter asset 
     const LOGO_URL = "https://cryptologos.cc/logos/polygon-matic-logo.png";
 
     const erc20Abi = [
@@ -108,16 +119,28 @@
         "function decimals() view returns (uint8)"
     ];
 
-    async function addNetworkAndLogo() {
-        if (!window.ethereum) {
-            alert("Crypto wallet extension not detected!");
+    async function addNetwork(targetWallet) {
+        let providerInstance = window.ethereum;
+
+        // Check if multiple providers exist (e.g., MetaMask and Trust Wallet are both installed)
+        if (window.ethereum && window.ethereum.providers) {
+            if (targetWallet === 'metamask') {
+                providerInstance = window.ethereum.providers.find(p => p.isMetaMask);
+            } else if (targetWallet === 'trustwallet') {
+                providerInstance = window.ethereum.providers.find(p => p.isTrust || p.isTrustWallet);
+            }
+        }
+
+        if (!providerInstance) {
+            alert(`Selected wallet application (${targetWallet}) extension was not detected!`);
             return;
         }
+
         try {
-            await window.ethereum.request({
+            await providerInstance.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x7a69', // 💡 Fixed hexadecimal value for Chain ID 31337
+                    chainId: '0x7a69', // Verified Hex structure target for Chain ID 31337
                     chainName: 'PolyCoin Network Testnet',
                     nativeCurrency: {
                         name: 'PolyCoin Gas',
@@ -126,20 +149,20 @@
                     },
                     rpcUrls: [CLOUDFLARE_URL],
                     blockExplorerUrls: null,
-                    iconUrls: [LOGO_URL] // 🖼️ Passes image asset down into the wallet app UI frame
+                    iconUrls: [LOGO_URL]
                 }]
             });
 
-            const provider = new window.ethers.providers.Web3Provider(window.ethereum);
+            const provider = new window.ethers.providers.Web3Provider(providerInstance);
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
             const address = await signer.getAddress();
             
             document.getElementById("walletAddress").innerText = address;
-            alert("Wallet successfully synced to PolyCoin Network!");
+            alert(`Successfully connected to ${targetWallet === 'metamask' ? 'MetaMask' : 'Trust Wallet'}!`);
         } catch (error) {
             console.error(error);
-            alert("Handshake timed out! Ensure your cloudflared tunnel command is active in your terminal.");
+            alert("Handshake integration timed out. Confirm your cloudflared endpoint is running smoothly.");
         }
     }
 
