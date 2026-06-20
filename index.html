@@ -41,7 +41,7 @@
         h1 { margin-bottom: 5px; color: #38bdf8; }
         .subtitle { color: #94a3b8; margin-bottom: 30px; }
         button {
-            color: #0f172a;
+            color: #ffffff;
             border: none;
             padding: 14px 24px;
             font-size: 16px;
@@ -56,10 +56,12 @@
             justify-content: center;
             gap: 10px;
         }
-        .btn-mm { background: #f6851b; color: #ffffff; }
+        .btn-mm { background: #f6851b; }
         .btn-mm:hover { background: #e27613; transform: translateY(-2px); }
-        .btn-tw { background: #3375bb; color: #ffffff; }
+        .btn-tw { background: #3375bb; }
         .btn-tw:hover { background: #225a94; transform: translateY(-2px); }
+        .btn-usdt { background: #26a17b; }
+        .btn-usdt:hover { background: #1e8363; transform: translateY(-2px); }
         .btn-action { background: #38bdf8; color: #0f172a; margin-top: 15px; }
         .btn-action:hover { background: #0ea5e9; transform: translateY(-2px); }
         .card {
@@ -82,8 +84,8 @@
     <p class="subtitle">Sovereign Windows-Hosted EVM Ecosystem</p>
 
     <button class="btn-mm" onclick="addNetwork('metamask')">🦊 Connect & Add to MetaMask</button>
-    
     <button class="btn-tw" onclick="addNetwork('trustwallet')">🛡️ Connect & Add to Trust Wallet</button>
+    <button class="btn-usdt" onclick="watchUsdtAsset()">💵 Add Custom USDT to Wallet Display</button>
     
     <button class="btn-action" onclick="loadBalances()">🔄 Check My Asset Balances</button>
 
@@ -111,8 +113,8 @@
     const POLY_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
     const USDT_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; 
     
-    // Web logo token icon image target parameter asset 
     const LOGO_URL = "https://cryptologos.cc/logos/polygon-matic-logo.png";
+    const USDT_LOGO_URL = "https://cryptologos.cc/logos/tether-usdt-logo.png";
 
     const erc20Abi = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -122,7 +124,6 @@
     async function addNetwork(targetWallet) {
         let providerInstance = window.ethereum;
 
-        // Check if multiple providers exist (e.g., MetaMask and Trust Wallet are both installed)
         if (window.ethereum && window.ethereum.providers) {
             if (targetWallet === 'metamask') {
                 providerInstance = window.ethereum.providers.find(p => p.isMetaMask);
@@ -140,7 +141,7 @@
             await providerInstance.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x7a69', // Verified Hex structure target for Chain ID 31337
+                    chainId: '0x7a69', 
                     chainName: 'PolyCoin Network Testnet',
                     nativeCurrency: {
                         name: 'PolyCoin Gas',
@@ -162,7 +163,32 @@
             alert(`Successfully connected to ${targetWallet === 'metamask' ? 'MetaMask' : 'Trust Wallet'}!`);
         } catch (error) {
             console.error(error);
-            alert("Handshake integration timed out. Confirm your cloudflared endpoint is running smoothly.");
+            alert("Handshake integration timed out.");
+        }
+    }
+
+    async function watchUsdtAsset() {
+        if (!window.ethereum) {
+            alert("Wallet extension not detected!");
+            return;
+        }
+        try {
+            // Requests wallet injection tracker for custom ERC-20 assets
+            await window.ethereum.request({
+                method: 'wallet_watchAsset',
+                params: {
+                    type: 'ERC20',
+                    options: {
+                        address: USDT_CONTRACT_ADDRESS,
+                        symbol: 'USDT',
+                        decimals: 6,
+                        image: USDT_LOGO_URL,
+                    },
+                },
+            });
+            alert("Custom USDT asset metadata sent to extension tracking ledger!");
+        } catch (error) {
+            console.error(error);
         }
     }
 
